@@ -29,6 +29,7 @@ public class LoginController {
          */
         String ip = request.getHeader(CommonConstants.REAL_IP);
         String token = request.getHeader(CommonConstants.TOKEN_NAME);
+        //feign_request false 前端调用是false
         //进行登录，并将这个token返回给前台
         UserResponse userResponse = userService.login(userLogin.getPhone(),userLogin.getPassword(),ip,token);
         return Result.success(userResponse);

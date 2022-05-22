@@ -15,9 +15,11 @@ public class Result<T> implements Serializable {
     public static final String SUCCESS_MESSAGE = "操作成功";//成功信息.
     public static final int ERROR_CODE = 500000;//错误码.
     public static final String ERROR_MESSAGE = "系统异常";//错误信息.
+
     private int code;
     private String msg;
     private T data;
+
     public Result(){}
     private Result(int code, String msg, T data){
         this.code = code;
@@ -30,12 +32,14 @@ public class Result<T> implements Serializable {
     public static <T> Result<T> success(String msg, T data){
         return new Result(SUCCESS_CODE,msg,data);
     }
+
     public static Result error(CodeMsg codeMsg){
         return new Result(codeMsg.getCode(),codeMsg.getMsg(),null);
     }
     public static Result defaultError(){
         return new Result(ERROR_CODE,ERROR_MESSAGE,null);
     }
+
     public boolean hasError(){
         //状态吗！=200 说明有错误.
         return this.code!=SUCCESS_CODE;

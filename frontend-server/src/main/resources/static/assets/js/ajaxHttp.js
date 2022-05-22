@@ -1,5 +1,6 @@
 //  通用的ajax方法
 function ajaxHttp (obj, callback, err) {
+    //window.location.origin=http://localhost:9000/uaa/token
     $.ajax(window.location.origin+":9000"+obj.url, {
         type: obj.type || 'get',
         contentType: obj.contentType || 'application/json;charset=UTF-8',
@@ -11,6 +12,7 @@ function ajaxHttp (obj, callback, err) {
             } else {
                 if (res.code === -2 || res.code === -3) {
                     localStorage.removeItem('token')
+                    //显示登录按钮
                     $('.commodity-header').find('.seckill-shopping').css('display', 'block')
                     setTimeout(function () {
                         layer.confirm('请先进行登录！！', {

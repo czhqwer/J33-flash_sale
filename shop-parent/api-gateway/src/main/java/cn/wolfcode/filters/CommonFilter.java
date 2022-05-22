@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 public class CommonFilter implements GlobalFilter {
     @Autowired
     private StringRedisTemplate redisTemplate;
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         /**
@@ -31,19 +32,25 @@ public class CommonFilter implements GlobalFilter {
          * 2.在请求头中添加FEIGN_REQUEST的请求头，值为0，标记请求不是Feign调用，而是客户端调用
          */
         ServerHttpRequest request = exchange.getRequest().mutate().
-                header(CommonConstants.REAL_IP,exchange.getRequest().getRemoteAddress().getHostString()).
-                header(CommonConstants.FEIGN_REQUEST_KEY,CommonConstants.FEIGN_REQUEST_FALSE).
-                build();
-        return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(()->{
+                //将前端的ip地址放在 X-REAL-IP=192.168.33.1
+                        header(CommonConstants.REAL_IP, exchange.getRequest().getRemoteAddress().getHostString()).
+                // FEIGN_REQUEST = 0 | false    true表示是微服务之间的调用，false表示不是微服务调用，是前端调用
+                        header(CommonConstants.FEIGN_REQUEST_KEY, CommonConstants.FEIGN_REQUEST_FALSE).
+                        build();
+        return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
             /**
              * post拦截逻辑
              * 在请求执行完微服务之后,需要刷新token在redis的时间
              * 判断token不为空 && Redis还存在这个token对于的key,这时候需要延长Redis中对应key的有效时间.
              */
-            String token,redisKey;
-            if(!StringUtils.isEmpty(token =exchange.getRequest().getHeaders().getFirst(CommonConstants.TOKEN_NAME))
-                    && redisTemplate.hasKey(redisKey = CommonRedisKey.USER_TOKEN.getRealKey(token))){
-                redisTemplate.expire(redisKey, CommonRedisKey.USER_TOKEN.getExpireTime(), CommonRedisKey.USER_TOKEN.getUnit());
+            String token, redisKey;
+            if (!StringUtils.isEmpty(token = exchange.getRequest().getHeaders().getFirst(CommonConstants.TOKEN_NAME))
+                    && redisTemplate.hasKey(redisKey = CommonRedisKey.USER_TOKEN.getRealKey(token))) { //还在登录的30分钟之内
+                redisTemplate
+                        .expire( //延长key的存活时间 30m
+                                redisKey,
+                                CommonRedisKey.USER_TOKEN.getExpireTime(),
+                                CommonRedisKey.USER_TOKEN.getUnit());
             }
         }));
     }

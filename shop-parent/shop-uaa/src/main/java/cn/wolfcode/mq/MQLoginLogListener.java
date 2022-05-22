@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RocketMQMessageListener(consumerGroup = "LoginLogGroup",topic = MQConstant.LOGIN_TOPIC)
 public class MQLoginLogListener implements RocketMQListener<LoginLog> {
-    @Autowired
+    @Autowired(required = false)
     private UserMapper userMapper;
     @Override
     public void onMessage(LoginLog message) {
