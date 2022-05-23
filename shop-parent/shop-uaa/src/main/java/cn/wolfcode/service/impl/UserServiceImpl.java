@@ -38,7 +38,7 @@ public class UserServiceImpl implements IUserService {
         //big key
         String hashKey = UaaRedisKey.USER_HASH.getRealKey("");
         String zSetKey = UaaRedisKey.USER_ZSET.getRealKey("");
-        //samll key
+        //small key
         String userKey = String.valueOf(phone);
         //从Redis中获取userInfo信息
         String objStr = (String) redisTemplate

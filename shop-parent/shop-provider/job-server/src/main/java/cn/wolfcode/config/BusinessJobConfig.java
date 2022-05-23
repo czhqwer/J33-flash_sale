@@ -1,5 +1,6 @@
 package cn.wolfcode.config;
 
+import cn.wolfcode.job.SeckillProductCacheJob;
 import cn.wolfcode.job.UserCacheJob;
 import cn.wolfcode.util.ElasticJobUtil;
 import com.dangdang.ddframe.job.lite.config.LiteJobConfiguration;
@@ -14,6 +15,13 @@ public class BusinessJobConfig {
     public SpringJobScheduler initUserCacheJob(CoordinatorRegistryCenter registryCenter, UserCacheJob userCacheJob){
         LiteJobConfiguration jobConfiguration = ElasticJobUtil.createDefaultSimpleJobConfiguration(userCacheJob.getClass(), userCacheJob.getCron());
         SpringJobScheduler springJobScheduler = new SpringJobScheduler(userCacheJob, registryCenter,jobConfiguration );
+        return springJobScheduler;
+    }
+
+    @Bean(initMethod = "init")
+    public SpringJobScheduler initSeckillProductCacheJob(CoordinatorRegistryCenter registryCenter, SeckillProductCacheJob seckillProductCacheJob){
+        LiteJobConfiguration jobConfiguration = ElasticJobUtil.createDefaultSimpleJobConfiguration(seckillProductCacheJob.getClass(), seckillProductCacheJob.getCron());
+        SpringJobScheduler springJobScheduler = new SpringJobScheduler(seckillProductCacheJob, registryCenter,jobConfiguration );
         return springJobScheduler;
     }
 }

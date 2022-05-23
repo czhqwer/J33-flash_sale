@@ -18,4 +18,12 @@ import java.util.List;
 public class SeckillProductController {
     @Autowired
     private ISeckillProductService seckillProductService;
+
+    @RequestMapping("/findAllSeckillProduct")
+    public Result<List<SeckillProductVo>> findAllSeckillProduct(){
+        //1 验证参数
+        //2 调用服务
+        List<SeckillProductVo> seckillProductList = seckillProductService.findAllSeckillProduct();
+        return Result.success(seckillProductList);
+    }
 }
