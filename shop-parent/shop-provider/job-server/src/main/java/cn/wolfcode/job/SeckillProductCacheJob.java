@@ -5,7 +5,6 @@ import cn.wolfcode.common.web.CommonCodeMsg;
 import cn.wolfcode.common.web.Result;
 import cn.wolfcode.domain.SeckillProductVo;
 import cn.wolfcode.feign.SeckillProductFeignApi;
-import cn.wolfcode.redis.JobRedisKey;
 import cn.wolfcode.redis.SeckillRedisKey;
 import com.alibaba.fastjson.JSON;
 import com.dangdang.ddframe.job.api.ShardingContext;
@@ -66,6 +65,7 @@ public class SeckillProductCacheJob implements SimpleJob {
         redisTemplate.delete(StoreCountkeys);
         //2 远程调用Seckill-server 获取今天的秒杀商品列表
         Result<List<SeckillProductVo>> result = seckillProductFeignApi.findAllSeckillProduct();
+        //System.out.println(result);
         if(StringUtils.isEmpty(result) //降级
                 || result.hasError()) { //异常引起的 !=200
             throw new BusinessException(CommonCodeMsg.RESULT_INVALID);

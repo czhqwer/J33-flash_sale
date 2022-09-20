@@ -35,7 +35,7 @@ public class RequireLoginInterceptor implements HandlerInterceptor {
                     && handlerMethod.getMethodAnnotation(RequireLogin.class) != null) { //方法上要有RequireLogin注解
                 response.setContentType("application/json;charset=utf-8");
                 String token = request.getHeader(CommonConstants.TOKEN_NAME); //token != null
-                //如果token没有数据，就错误返回
+                //如果有token 没有数据，就错误返回
                 if (StringUtils.isEmpty(token)) {
                     response.getWriter().write(JSON.toJSONString(Result.error(CommonCodeMsg.TOKEN_INVALID)));
                     return false;

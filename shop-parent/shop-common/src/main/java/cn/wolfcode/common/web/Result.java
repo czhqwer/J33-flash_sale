@@ -41,7 +41,7 @@ public class Result<T> implements Serializable {
     }
 
     public boolean hasError(){
-        //状态吗！=200 说明有错误.
+        //状态码！=200 说明有错误.
         return this.code!=SUCCESS_CODE;
     }
 

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public enum SeckillRedisKey {
     SECKILL_PRODUCT_HASH("seckillProductHash:"),//秒杀商品的前缀
-    SECKILL_ORDER_HASH("seckillOrderHash:"),
+    SECKILL_ORDER_SET("seckillOrderSet:"), //秒杀商品的信息前缀
     SECKILL_STOCK_COUNT_HASH("seckillStockCount:"),//库存的前缀
     SECKILL_REAL_COUNT_HASH("seckillRealCount:");
     SeckillRedisKey(String prefix, TimeUnit unit, int expireTime){

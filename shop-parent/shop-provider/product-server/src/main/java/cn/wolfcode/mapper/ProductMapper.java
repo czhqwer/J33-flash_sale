@@ -1,7 +1,7 @@
 package cn.wolfcode.mapper;
 
 import cn.wolfcode.domain.Product;
-import feign.Param;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

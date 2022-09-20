@@ -1,4 +1,4 @@
-var timeStart;
+    var timeStart;
 var currentSet;
 var timeArray = [10,12,14]
 var tabData = [{
