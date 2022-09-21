@@ -1,11 +1,8 @@
 package cn.wolfcode.service.impl;
 
-import java.math.BigDecimal;
 import java.util.Date;
-
 import cn.wolfcode.common.exception.BusinessException;
 import cn.wolfcode.domain.OrderInfo;
-import cn.wolfcode.domain.SeckillProduct;
 import cn.wolfcode.domain.SeckillProductVo;
 import cn.wolfcode.mapper.OrderInfoMapper;
 import cn.wolfcode.mapper.PayLogMapper;
@@ -92,4 +89,15 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
 
         return orderNo; //订单编号
     }
+
+    @Override
+    public OrderInfo findByOrderNo(String orderNo) {
+        return orderInfoMapper.find(orderNo);
+    }
+
+    @Override
+    public int changeOrderStatusToTimeout(String orderNo) {
+        return orderInfoMapper.updateCancelStatus(orderNo, OrderInfo.STATUS_TIMEOUT);
+    }
+
 }

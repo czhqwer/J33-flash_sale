@@ -17,4 +17,6 @@ public interface ISeckillProductService {
 
     int descStoreCount(Long seckillId);
 
+    int incrStoreCount(Long seckillId);
+
 }

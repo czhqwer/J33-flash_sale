@@ -4,7 +4,6 @@ package cn.wolfcode.service;
 import cn.wolfcode.domain.OrderInfo;
 import cn.wolfcode.mq.OrderMessage;
 
-import java.util.Map;
 
 /**
  * Created by wolfcode-lanxw
@@ -12,5 +11,9 @@ import java.util.Map;
 public interface IOrderInfoService {
 
     String order(OrderMessage message);
+
+    OrderInfo findByOrderNo(String orderNo);
+
+    int changeOrderStatusToTimeout(String orderNo);
 
 }

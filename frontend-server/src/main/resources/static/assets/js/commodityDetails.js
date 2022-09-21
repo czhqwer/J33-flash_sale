@@ -40,10 +40,11 @@ function snapped (seckillId, time) {
             contentType:'application/x-www-form-urlencoded;charset=UTF-8',
             data: {seckillId:seckillId,time:time},
         }, function(params){
-            // if(!socket){
-            //     socket = createScoket(token);
-            // }
-            window.location.href="/order_detail.html?orderNo="+params.data;
+            //前端的幂等性
+            if(!socket){ //第一次点击秒杀进入，第一次之后再点击就进不来
+                socket = createScoket(token);
+            }
+            //window.location.href="/order_detail.html?orderNo="+params.data;
         });
     } else {
         layer.confirm('请先进行登录！！', {

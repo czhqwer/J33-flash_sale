@@ -1,8 +1,6 @@
 package cn.wolfcode.mq.listener;
 
 
-import cn.wolfcode.mq.MQConstant;
-import cn.wolfcode.mq.OrderMQResult;
 import cn.wolfcode.mq.OrderMessage;
 import cn.wolfcode.service.IOrderInfoService;
 import cn.wolfcode.web.msg.SeckillCodeMsg;
@@ -36,16 +34,17 @@ public class OrderPeddingListener implements RocketMQListener<OrderMessage> {
             String orderNo = orderInfoService.order(message);
             result.setOrderNo(orderNo);
             //如果成功，发送延时消息
-//            rocketMQTemplate.syncSend(MQConstant.ORDER_PAY_TIMEOUT_TOPIC,
-//                    MessageBuilder.withPayload(result).build(),
-//                    5000, MQConstant.ORDER_PAY_TIMEOUT_DELAY_LEVEL);
+            rocketMQTemplate.syncSend(MQConstant.ORDER_PAY_TIMEOUT_TOPIC,
+                    MessageBuilder.withPayload(result).build(),
+                    5000,
+                    MQConstant.ORDER_PAY_TIMEOUT_DELAY_LEVEL); //10s
         } catch (Exception e) {
             e.printStackTrace();
             result.setMsg(SeckillCodeMsg.SECKILL_ERROR.getMsg());
             result.setCode(SeckillCodeMsg.SECKILL_ERROR.getCode());
             //如果失败，发送失败消息
-//            rocketMQTemplate.syncSend(MQConstant.ORDER_PAY_TIMEOUT_TOPIC + ":" +
-//                    MQConstant.ORDER_RESULT_FAIL_TAG, result);
+            rocketMQTemplate.syncSend(MQConstant.ORDER_PAY_TIMEOUT_TOPIC + ":" +
+                    MQConstant.ORDER_RESULT_FAIL_TAG, result);
         } finally {
             //无论成功失败，发送结果消息
 //            rocketMQTemplate.syncSend(MQConstant.ORDER_PAY_TIMEOUT_TOPIC, result);
