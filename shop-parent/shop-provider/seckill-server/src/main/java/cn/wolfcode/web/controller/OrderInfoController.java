@@ -6,6 +6,7 @@ import cn.wolfcode.common.exception.BusinessException;
 import cn.wolfcode.common.web.Result;
 import cn.wolfcode.common.web.anno.RequireLogin;
 import cn.wolfcode.domain.SeckillProduct;
+import cn.wolfcode.mq.MQConstant;
 import cn.wolfcode.mq.OrderMessage;
 import cn.wolfcode.redis.CommonRedisKey;
 import cn.wolfcode.redis.SeckillRedisKey;

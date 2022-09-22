@@ -1,6 +1,8 @@
 package cn.wolfcode.mq.listener;
 
 
+import cn.wolfcode.mq.MQConstant;
+import cn.wolfcode.mq.OrderMQResult;
 import cn.wolfcode.mq.OrderMessage;
 import cn.wolfcode.service.IOrderInfoService;
 import cn.wolfcode.web.msg.SeckillCodeMsg;

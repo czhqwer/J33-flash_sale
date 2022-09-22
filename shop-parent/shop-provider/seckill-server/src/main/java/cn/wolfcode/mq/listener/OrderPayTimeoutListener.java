@@ -4,6 +4,8 @@ package cn.wolfcode.mq.listener;
 import cn.wolfcode.common.exception.BusinessException;
 import cn.wolfcode.domain.OrderInfo;
 import cn.wolfcode.domain.SeckillProduct;
+import cn.wolfcode.mq.MQConstant;
+import cn.wolfcode.mq.OrderMQResult;
 import cn.wolfcode.redis.SeckillRedisKey;
 import cn.wolfcode.service.IOrderInfoService;
 import cn.wolfcode.service.ISeckillProductService;

@@ -1,5 +1,6 @@
 package cn.wolfcode.mq.listener;
 
+import cn.wolfcode.mq.MQConstant;
 import cn.wolfcode.web.controller.OrderInfoController;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
