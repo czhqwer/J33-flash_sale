@@ -18,17 +18,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketServer {
     private Session session;
-    public static ConcurrentHashMap<String,WebSocketServer> clients = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, WebSocketServer> clients = new ConcurrentHashMap<>();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam( "token") String token){
-        System.out.println("OnOpen()客户端连接===>"+token);
+    public void onOpen(Session session, @PathParam("token") String token) {
+        System.out.println("OnOpen()客户端连接===>" + token);
         this.session = session;
-        clients.put(token,this);
+        clients.put(token, this);
     }
 
     @OnClose
-    public void onClose(@PathParam( "token") String token){
+    public void onClose(@PathParam("token") String token) {
         clients.remove(token);
     }
 

@@ -38,7 +38,7 @@ public class OrderResultErrorListener implements RocketMQListener<OrderMQResult>
         String bigKey = SeckillRedisKey.SECKILL_STOCK_COUNT_HASH.getRealKey(String.valueOf(result.getTime()));
         String smallKey = String.valueOf(result.getSeckillId());
         redisTemplate.opsForHash().put(bigKey, smallKey, String.valueOf(seckillProduct.getStockCount()));
-        System.err.println("发消息");
+        System.err.println("OrderResultErrorListener发消息");
 
         //广播消息修改本地标识为true
         rocketMQTemplate.syncSend(MQConstant.CANCEL_SECKILL_OVER_SIGE_TOPIC, result.getSeckillId());

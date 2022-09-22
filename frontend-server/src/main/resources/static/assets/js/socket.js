@@ -13,7 +13,9 @@ function createScoket(token){
         };
         //获得消息事件
         socket.onmessage = function(result) {
+            console.log(result)
             var data = $.parseJSON(result.data);
+
             if(data.orderNo){
                 layer.confirm("恭喜你，秒杀成功！查看订单？",{btn:["确定","取消"]},
                     function(){

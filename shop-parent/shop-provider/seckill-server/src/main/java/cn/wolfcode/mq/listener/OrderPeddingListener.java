@@ -48,8 +48,9 @@ public class OrderPeddingListener implements RocketMQListener<OrderMessage> {
             rocketMQTemplate.syncSend(MQConstant.ORDER_PAY_TIMEOUT_TOPIC + ":" +
                     MQConstant.ORDER_RESULT_FAIL_TAG, result);
         } finally {
+            System.out.println("发送结果消息");
             //无论成功失败，发送结果消息
-//            rocketMQTemplate.syncSend(MQConstant.ORDER_PAY_TIMEOUT_TOPIC, result);
+            rocketMQTemplate.syncSend(MQConstant.ORDER_RESULT_TOPIC, result);
         }
         System.out.println(result);
     }
