@@ -15,5 +15,5 @@ public class MQConstant {
     //订单创建成失败Tag
     public static final String ORDER_RESULT_FAIL_TAG = "FAIL";
     //延迟消息等级
-    public static final int ORDER_PAY_TIMEOUT_DELAY_LEVEL = 3; //13
+    public static final int ORDER_PAY_TIMEOUT_DELAY_LEVEL = 14; //13 -- 9分钟 | 14 -- 10分钟
 }

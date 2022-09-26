@@ -1,9 +1,14 @@
 package cn.wolfcode.web.controller;
 
 
+import cn.wolfcode.common.exception.BusinessException;
+import cn.wolfcode.common.web.CommonCodeMsg;
+import cn.wolfcode.common.web.Result;
+import cn.wolfcode.common.web.anno.RequireLogin;
 import cn.wolfcode.service.IOrderInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,4 +24,13 @@ import java.util.Map;
 public class OrderPayController {
     @Autowired
     private IOrderInfoService orderInfoService;
+
+    @RequestMapping("/alipay")
+    @RequireLogin
+    public Result<String> alipay(String orderNo, Integer type) {
+        if (StringUtils.isEmpty(orderNo) || StringUtils.isEmpty(type)) {
+            throw new BusinessException(CommonCodeMsg.PARAM_INVALID);
+        }
+        return Result.success(orderInfoService.alipay(orderNo, type));
+    }
 }

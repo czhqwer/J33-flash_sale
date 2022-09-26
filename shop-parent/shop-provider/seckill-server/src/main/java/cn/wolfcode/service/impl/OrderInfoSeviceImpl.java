@@ -83,10 +83,9 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         if (m <= 0) {
             throw new BusinessException(SeckillCodeMsg.SECKILL_ERROR);
         }
-        //在Redis中添加订单信息
-        redisTemplate.opsForSet().add(SeckillRedisKey.SECKILL_ORDER_SET.getRealKey(String.valueOf(message.getUserPhone())),
-                String.valueOf(message.getSeckillId()));
-
+        //在Redis中添加订单信息(这段代码已经移动到cancel中操作)
+//        redisTemplate.opsForSet().add(SeckillRedisKey.SECKILL_ORDER_SET.getRealKey(String.valueOf(message.getUserPhone())),
+//                String.valueOf(message.getSeckillId()));
         return orderNo; //订单编号
     }
 
@@ -98,6 +97,25 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
     @Override
     public int changeOrderStatusToTimeout(String orderNo) {
         return orderInfoMapper.updateCancelStatus(orderNo, OrderInfo.STATUS_TIMEOUT);
+    }
+
+    @Override
+    public String alipay(String orderNo, Integer type) {
+        String ret = null;
+        switch(type) {
+            case OrderInfo.PAYTYPE_ONLINE: //在线支付
+                ret = payOnLine(orderNo);
+                break;
+            case OrderInfo.PAYTYPE_INTERGRAL: //积分支付
+                break;
+        }
+        return ret;
+    }
+
+    private String payOnLine(String orderNo) {
+        //实现支付宝支付功能
+
+        return null;
     }
 
 }

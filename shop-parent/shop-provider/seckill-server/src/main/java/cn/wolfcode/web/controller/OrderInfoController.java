@@ -3,8 +3,10 @@ package cn.wolfcode.web.controller;
 import cn.wolfcode.common.constants.CommonConstants;
 import cn.wolfcode.common.domain.UserInfo;
 import cn.wolfcode.common.exception.BusinessException;
+import cn.wolfcode.common.web.CommonCodeMsg;
 import cn.wolfcode.common.web.Result;
 import cn.wolfcode.common.web.anno.RequireLogin;
+import cn.wolfcode.domain.OrderInfo;
 import cn.wolfcode.domain.SeckillProduct;
 import cn.wolfcode.mq.MQConstant;
 import cn.wolfcode.mq.OrderMessage;
@@ -20,6 +22,8 @@ import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,6 +50,9 @@ public class OrderInfoController {
     @RequireLogin //必须是登录用户才能访问这个方法
     @PostMapping("/doSeckill")
     public Result<String> doSeckill(Long seckillId, Integer time, HttpServletRequest request) {
+        if (StringUtils.isEmpty(seckillId) || StringUtils.isEmpty(time)) {
+            throw new BusinessException(CommonCodeMsg.PARAM_INVALID);
+        }
         // 1 判断本地标识，如果为true，放行，false，表示秒杀结束
         if (LOCAL_FLAG.get(seckillId) == null) {
             LOCAL_FLAG.put(seckillId, true);
@@ -105,5 +112,14 @@ public class OrderInfoController {
         }
 
         return Result.success(ret);
+    }
+
+    @RequireLogin
+    @GetMapping("/find")
+    public Result<OrderInfo> find(String orderNo) {
+        if (StringUtils.isEmpty(orderNo)) {
+            throw new BusinessException(CommonCodeMsg.PARAM_INVALID);
+        }
+        return Result.success(orderInfoService.findByOrderNo(orderNo));
     }
 }

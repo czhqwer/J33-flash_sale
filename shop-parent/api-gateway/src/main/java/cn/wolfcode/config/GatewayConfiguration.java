@@ -69,9 +69,9 @@ public class GatewayConfiguration {
     @PostConstruct
     private void initCustomizedApis() {
         Set<ApiDefinition> definitions = new HashSet<>();
-        ApiDefinition api1 = new ApiDefinition("order_api1")
+        ApiDefinition api1 = new ApiDefinition("order_api")
                 .setPredicateItems(new HashSet<ApiPredicateItem>() {{
-                    add(new ApiPathPredicateItem().setPattern("/order-serv/api1/**").
+                    add(new ApiPathPredicateItem().setPattern("/seckill/order/**").
                             setMatchStrategy(SentinelGatewayConstants.URL_MATCH_STRATEGY_PREFIX));
                 }});
         definitions.add(api1);
@@ -81,13 +81,15 @@ public class GatewayConfiguration {
     @PostConstruct
     private void initGatewayRules() {
         Set<GatewayFlowRule> rules = new HashSet<>();
-       /* rules.add(new GatewayFlowRule("product_route")
-                .setCount(3)
-                .setIntervalSec(1)
+        //针对秒杀路由的限流
+        rules.add(new GatewayFlowRule("seckill_route")
+                .setCount(3000) //3000次
+                .setIntervalSec(1) //1秒
         );
-        rules.add(new GatewayFlowRule("order_api1").
-                setCount(1).
-                setIntervalSec(1));*/
+        //针对秒杀路由中的 order controller的限流
+        rules.add(new GatewayFlowRule("order_api").
+                setCount(1000).
+                setIntervalSec(1));
         GatewayRuleManager.loadRules(rules);
     }
 

@@ -16,4 +16,6 @@ public interface IOrderInfoService {
 
     int changeOrderStatusToTimeout(String orderNo);
 
+    String alipay(String orderNo, Integer type);
+
 }
