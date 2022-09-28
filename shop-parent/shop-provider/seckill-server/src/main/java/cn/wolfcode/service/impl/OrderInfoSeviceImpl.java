@@ -2,7 +2,10 @@ package cn.wolfcode.service.impl;
 
 import java.util.Date;
 import cn.wolfcode.common.exception.BusinessException;
+import cn.wolfcode.common.web.CommonCodeMsg;
+import cn.wolfcode.common.web.Result;
 import cn.wolfcode.domain.OrderInfo;
+import cn.wolfcode.domain.PayVo;
 import cn.wolfcode.domain.SeckillProductVo;
 import cn.wolfcode.mapper.OrderInfoMapper;
 import cn.wolfcode.mapper.PayLogMapper;
@@ -112,10 +115,25 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         return ret;
     }
 
+    //实现支付宝支付功能
     private String payOnLine(String orderNo) {
-        //实现支付宝支付功能
+        //通过订单编号 查询订单信息
+        OrderInfo orderInfo = orderInfoMapper.find(orderNo);
+        //远程掉i用支付服务 进行付款
+        PayVo payVo = new PayVo();
+        payVo.setOutTradeNo(orderNo);
+        payVo.setTotalAmount(orderInfo.getSeckillPrice().toString());
+        payVo.setSubject(orderInfo.getProductName());
+        payVo.setBody("这个太赚了！");
+        payVo.setReturnUrl("");
+        payVo.setNotifyUrl("");
+        Result<String> result = null;
+        if (StringUtils.isEmpty(result) || result.hasError()) {
+            throw new BusinessException(CommonCodeMsg.RESULT_INVALID);
+        }
 
-        return null;
+
+        return result.getData();
     }
 
 }
