@@ -8,12 +8,17 @@ import cn.wolfcode.config.AlipayProperties;
 import cn.wolfcode.domain.PayVo;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/alipay")
@@ -57,5 +62,20 @@ public class AlipayController {
         }
 
         return Result.success(result);
+    }
+
+    @RequestMapping("/rsaCheck")
+    Result<Boolean> rsaCheck(@RequestParam Map<String, String> params) {
+        boolean signVerified = false;
+        try {
+            signVerified = AlipaySignature.rsaCheckV1(
+                    params,
+                    alipayProperties.getAlipayPublicKey(),
+                    alipayProperties.getCharset(),
+                    alipayProperties.getSignType());
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return Result.success(signVerified);
     }
 }

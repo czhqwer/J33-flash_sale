@@ -1,10 +1,15 @@
 package cn.wolfcode.service.impl;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+
 import cn.wolfcode.common.exception.BusinessException;
 import cn.wolfcode.common.web.CommonCodeMsg;
 import cn.wolfcode.common.web.Result;
 import cn.wolfcode.domain.OrderInfo;
+import cn.wolfcode.domain.PayLog;
 import cn.wolfcode.domain.PayVo;
 import cn.wolfcode.domain.SeckillProductVo;
 import cn.wolfcode.feign.PayFeignApi;
@@ -25,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by wolfcode-lanxw
@@ -117,12 +123,75 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
     @Override
     public String alipay(String orderNo, Integer type) {
         String ret = null;
-        switch(type) {
+        switch (type) {
             case OrderInfo.PAYTYPE_ONLINE: //在线支付
                 ret = payOnLine(orderNo);
                 break;
             case OrderInfo.PAYTYPE_INTERGRAL: //积分支付
                 break;
+        }
+        return ret;
+    }
+
+    @Override
+    public void returnUrl(Map<String, String> params, HttpServletResponse response) {
+        //验签操作
+        Result<Boolean> result = payFeignApi.rsaCheck(params);
+        if (StringUtils.isEmpty(result) || result.hasError()) {
+            throw new BusinessException(CommonCodeMsg.RESULT_INVALID);
+        }
+        if (result.getData()) {
+            //判断notify方法是否已经执行完成 如果没有执行，重定向到一个错误页面
+            OrderInfo orderInfo = orderInfoMapper.find(params.get("out_trade_no"));
+            if (orderInfo != null && orderInfo.getStatus() == OrderInfo.STATUS_ARREARAGE) {
+                throw new RuntimeException("系统忙，请稍后再查询");
+            }
+            //重定向到一个页面
+            //frontEndPayUrl: http://localhost/order_detail.html?orderNo=
+            try {
+                response.sendRedirect(frontEndPayUrl + params.get("out_trade_no"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            throw new BusinessException(SeckillCodeMsg.PAY_SERVER_ERROR);
+        }
+
+    }
+
+    @Override
+    public String notifyUrl(Map<String, String> params) {
+        //验签操作
+        Result<Boolean> result = payFeignApi.rsaCheck(params);
+        if (StringUtils.isEmpty(result) || result.hasError()) {
+            throw new BusinessException(CommonCodeMsg.RESULT_INVALID);
+        }
+        String ret = "success";
+        if (result.getData()) {
+           //处理业务逻辑
+
+            try {
+                PayLog payLog = new PayLog();
+                payLog.setTradeNo(params.get("trade_no"));
+                payLog.setOutTradeNo(params.get("out_trade_no"));
+                payLog.setNotifyTime(new Date().getTime() + "");
+                payLog.setTotalAmount(params.get("total_amount"));
+                payLog.setPayType(PayLog.PAY_TYPE_ONLINE);
+                payLogMapper.insert(payLog);//添加支付日志
+                System.out.println(params.get("out_trade_no"));
+
+                //修改订单状态为 已付款
+                orderInfoMapper.changePayStatus(
+                        params.get("out_trade_no"),
+                        OrderInfo.STATUS_ACCOUNT_PAID,
+                        OrderInfo.PAYTYPE_ONLINE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                //处理失败 ret = fail
+                ret = "fail";
+            }
+        } else {
+            throw new BusinessException(SeckillCodeMsg.PAY_SERVER_ERROR);
         }
         return ret;
     }

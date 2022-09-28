@@ -8,12 +8,18 @@ import cn.wolfcode.feign.ProductFeignApi;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class PayFeignFallback implements PayFeignApi {
 
     @Override
     public Result<String> pay(PayVo payVo) {
+        return null;
+    }
+
+    @Override
+    public Result<Boolean> rsaCheck(Map<String, String> params) {
         return null;
     }
 }
