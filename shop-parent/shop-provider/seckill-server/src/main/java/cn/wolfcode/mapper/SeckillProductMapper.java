@@ -1,10 +1,11 @@
 package cn.wolfcode.mapper;
 
 import cn.wolfcode.domain.SeckillProduct;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
-
+@Mapper
 public interface SeckillProductMapper {
     /**
      * 根据time时间场次查询对应的秒杀商品集合

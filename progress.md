@@ -1,4 +1,10 @@
 > 启项目要修改秒杀商品的时间（今天的日期+1）
+> 每次重启NATAPP都要修改alipay配置文件的路径
+> 
+> git提示“warning: LF will be replaced by CRLF”的解决办法
+> 【提交时转换为LF，检出时转换为CRLF】 
+> 
+> ``$ git config --global core.autocrlf true``
 
 2022/07/15 -- day15  -1- 
 
@@ -14,4 +20,4 @@
 
 2022/09/26 -- day18 -完-
 
-2022/09/27 -- day19 -4:33m-
+2022/09/27 -- day19 -10:0m-

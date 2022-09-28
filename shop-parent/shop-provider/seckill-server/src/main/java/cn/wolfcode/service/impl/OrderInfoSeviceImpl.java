@@ -7,6 +7,7 @@ import cn.wolfcode.common.web.Result;
 import cn.wolfcode.domain.OrderInfo;
 import cn.wolfcode.domain.PayVo;
 import cn.wolfcode.domain.SeckillProductVo;
+import cn.wolfcode.feign.PayFeignApi;
 import cn.wolfcode.mapper.OrderInfoMapper;
 import cn.wolfcode.mapper.PayLogMapper;
 import cn.wolfcode.mapper.RefundLogMapper;
@@ -17,6 +18,7 @@ import cn.wolfcode.service.ISeckillProductService;
 import cn.wolfcode.util.IdGenerateUtil;
 import cn.wolfcode.web.msg.SeckillCodeMsg;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,16 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
     private PayLogMapper payLogMapper;
     @Resource
     private RefundLogMapper refundLogMapper;
+
+    @Resource
+    private PayFeignApi payFeignApi;
+
+    @Value("${pay.returnUrl}")
+    private String returnUrl;
+    @Value("${pay.notifyUrl}")
+    private String notifyUrl;
+    @Value("${pay.frontEndPayUrl}")
+    private String frontEndPayUrl;
 
     @Override
     @Transactional
@@ -125,14 +137,12 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         payVo.setTotalAmount(orderInfo.getSeckillPrice().toString());
         payVo.setSubject(orderInfo.getProductName());
         payVo.setBody("这个太赚了！");
-        payVo.setReturnUrl("");
-        payVo.setNotifyUrl("");
-        Result<String> result = null;
+        payVo.setReturnUrl(returnUrl); //同步访问地址
+        payVo.setNotifyUrl(notifyUrl); //异步访问地址
+        Result<String> result = payFeignApi.pay(payVo);
         if (StringUtils.isEmpty(result) || result.hasError()) {
             throw new BusinessException(CommonCodeMsg.RESULT_INVALID);
         }
-
-
         return result.getData();
     }
 

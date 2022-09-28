@@ -1,11 +1,13 @@
 package cn.wolfcode.mapper;
 
 import cn.wolfcode.domain.OrderInfo;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
  * Created by wolfcode-lanxw
  */
+@Mapper
 public interface OrderInfoMapper {
     /**
      * 插入订单信息
