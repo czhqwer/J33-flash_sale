@@ -8,10 +8,7 @@ import java.util.Map;
 import cn.wolfcode.common.exception.BusinessException;
 import cn.wolfcode.common.web.CommonCodeMsg;
 import cn.wolfcode.common.web.Result;
-import cn.wolfcode.domain.OrderInfo;
-import cn.wolfcode.domain.PayLog;
-import cn.wolfcode.domain.PayVo;
-import cn.wolfcode.domain.SeckillProductVo;
+import cn.wolfcode.domain.*;
 import cn.wolfcode.feign.PayFeignApi;
 import cn.wolfcode.mapper.OrderInfoMapper;
 import cn.wolfcode.mapper.PayLogMapper;
@@ -156,7 +153,6 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         } else {
             throw new BusinessException(SeckillCodeMsg.PAY_SERVER_ERROR);
         }
-
     }
 
     @Override
@@ -168,7 +164,7 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         }
         String ret = "success";
         if (result.getData()) {
-           //处理业务逻辑
+            //处理业务逻辑
 
             try {
                 PayLog payLog = new PayLog();
@@ -194,6 +190,55 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
             throw new BusinessException(SeckillCodeMsg.PAY_SERVER_ERROR);
         }
         return ret;
+    }
+
+    @Override
+    @Transactional
+    public String refund(String orderNo) {
+        String ret = "退款成功";
+        //通过订单编号查询订单信息
+        OrderInfo orderInfo = orderInfoMapper.find(orderNo);
+        if (StringUtils.isEmpty(orderInfo)) {
+            throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
+        }
+        switch (orderInfo.getPayType()) {
+            case OrderInfo.PAYTYPE_ONLINE:
+                ret = refundOnLine(orderInfo);
+                break;
+            case OrderInfo.PAYTYPE_INTERGRAL:
+                break;
+        }
+        //根据订单的支付类型，走支付宝退款或者积分退款
+        return ret;
+    }
+
+    private String refundOnLine(OrderInfo orderInfo) {
+        //远程调用支付服务 退款
+        Result<Boolean> result = null;
+        if (StringUtils.isEmpty(result) || result.hasError()) {
+            throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
+        }
+        //如果退款失败，返回的字符串 ”退款失败，请联系客服“
+        if (!result.getData()) {
+            return "退款失败，请联系客服人员";
+        }
+        //如果退款成功，修改订单状态为已退款
+        int m = orderInfoMapper.changeRefundStatus(orderInfo.getOrderNo(), OrderInfo.STATUS_REFUND);
+        if (m <= 0) {
+            throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
+        }
+        //记录退款日志
+        RefundLog refundLog = new RefundLog();
+        refundLog.setOutTradeNo(orderInfo.getOrderNo());
+        refundLog.setRefundAmount(orderInfo.getSeckillPrice().toString());
+        refundLog.setRefundReason("不想要了");
+        refundLog.setRefundType(OrderInfo.PAYTYPE_ONLINE);
+        refundLog.setRefundTime(new Date());
+        m = refundLogMapper.insert(refundLog);
+        if (m <= 0) {
+            throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
+        }
+        return "退款成功！";
     }
 
     //实现支付宝支付功能

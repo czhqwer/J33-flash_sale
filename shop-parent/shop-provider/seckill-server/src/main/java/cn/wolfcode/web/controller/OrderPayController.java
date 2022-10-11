@@ -49,4 +49,13 @@ public class OrderPayController {
         //success fail
         return orderInfoService.notifyUrl(params);
     }
+
+    @RequestMapping("/refund")
+    @RequireLogin
+    public Result<String> refund(String orderNo) {
+        if (StringUtils.isEmpty(orderNo)) {
+            throw new BusinessException(CommonCodeMsg.PARAM_INVALID);
+        }
+        return  Result.success(orderInfoService.refund(orderNo));
+    }
 }

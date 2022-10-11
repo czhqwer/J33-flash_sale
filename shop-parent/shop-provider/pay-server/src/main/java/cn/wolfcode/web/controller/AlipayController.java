@@ -3,6 +3,7 @@ package cn.wolfcode.web.controller;
 import cn.wolfcode.common.exception.BusinessException;
 import cn.wolfcode.common.web.CommonCodeMsg;
 import cn.wolfcode.common.web.Result;
+import cn.wolfcode.common.web.anno.RequireLogin;
 import cn.wolfcode.config.AlipayConfig;
 import cn.wolfcode.config.AlipayProperties;
 import cn.wolfcode.domain.PayVo;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @RestController
@@ -28,6 +28,11 @@ public class AlipayController {
     @Autowired
     private AlipayProperties alipayProperties;
 
+
+    /**
+     * @param payVo
+     * @return
+     */
     @RequestMapping("/pay")
     Result<String> pay(@RequestBody PayVo payVo) {
         if (StringUtils.isEmpty(payVo)) {
@@ -47,10 +52,10 @@ public class AlipayController {
         //商品描述，可空
         String body = payVo.getBody();
 
-        alipayRequest.setBizContent("{\"out_trade_no\":\""+ out_trade_no +"\","
-                + "\"total_amount\":\""+ total_amount +"\","
-                + "\"subject\":\""+ subject +"\","
-                + "\"body\":\""+ body +"\","
+        alipayRequest.setBizContent("{\"out_trade_no\":\"" + out_trade_no + "\","
+                + "\"total_amount\":\"" + total_amount + "\","
+                + "\"subject\":\"" + subject + "\","
+                + "\"body\":\"" + body + "\","
                 + "\"product_code\":\"FAST_INSTANT_TRADE_PAY\"}");
 
         //请求
@@ -64,6 +69,10 @@ public class AlipayController {
         return Result.success(result);
     }
 
+    /**
+     * @param params
+     * @return
+     */
     @RequestMapping("/rsaCheck")
     Result<Boolean> rsaCheck(@RequestParam Map<String, String> params) {
         boolean signVerified = false;

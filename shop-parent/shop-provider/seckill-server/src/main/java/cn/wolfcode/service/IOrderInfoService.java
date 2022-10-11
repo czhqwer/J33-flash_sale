@@ -25,4 +25,6 @@ public interface IOrderInfoService {
 
     String notifyUrl(Map<String, String> params);
 
+    String refund(String orderNo);
+
 }
