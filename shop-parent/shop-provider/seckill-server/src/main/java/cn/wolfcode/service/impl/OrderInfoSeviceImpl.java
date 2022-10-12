@@ -156,6 +156,7 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
     }
 
     @Override
+    @Transactional
     public String notifyUrl(Map<String, String> params) {
         //验签操作
         Result<Boolean> result = payFeignApi.rsaCheck(params);
@@ -165,7 +166,6 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         String ret = "success";
         if (result.getData()) {
             //处理业务逻辑
-
             try {
                 PayLog payLog = new PayLog();
                 payLog.setTradeNo(params.get("trade_no"));
@@ -214,7 +214,13 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
 
     private String refundOnLine(OrderInfo orderInfo) {
         //远程调用支付服务 退款
-        Result<Boolean> result = null;
+        RefundVo refundVo = new RefundVo();
+        refundVo.setOutTradeNo(orderInfo.getOrderNo());
+        refundVo.setRefundAmount(orderInfo.getSeckillPrice().toString());
+        refundVo.setRefundReason("不想要了");
+
+
+        Result<Boolean> result = payFeignApi.refund(refundVo);
         if (StringUtils.isEmpty(result) || result.hasError()) {
             throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
         }
@@ -231,7 +237,7 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         RefundLog refundLog = new RefundLog();
         refundLog.setOutTradeNo(orderInfo.getOrderNo());
         refundLog.setRefundAmount(orderInfo.getSeckillPrice().toString());
-        refundLog.setRefundReason("不想要了");
+        refundLog.setRefundReason(refundVo.getRefundReason());
         refundLog.setRefundType(OrderInfo.PAYTYPE_ONLINE);
         refundLog.setRefundTime(new Date());
         m = refundLogMapper.insert(refundLog);

@@ -2,6 +2,7 @@ package cn.wolfcode.feign;
 
 import cn.wolfcode.common.web.Result;
 import cn.wolfcode.domain.PayVo;
+import cn.wolfcode.domain.RefundVo;
 import cn.wolfcode.feign.fallback.PayFeignFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,5 +19,8 @@ public interface PayFeignApi {
 
     @RequestMapping("/alipay/rsaCheck")
     Result<Boolean> rsaCheck(@RequestParam Map<String, String> params);
+
+    @RequestMapping("/alipay/refund")
+    Result<Boolean> refund(@RequestBody RefundVo refundVo);
 
 }
