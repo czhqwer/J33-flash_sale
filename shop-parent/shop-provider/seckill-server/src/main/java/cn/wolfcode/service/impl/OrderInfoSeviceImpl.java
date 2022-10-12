@@ -9,6 +9,7 @@ import cn.wolfcode.common.exception.BusinessException;
 import cn.wolfcode.common.web.CommonCodeMsg;
 import cn.wolfcode.common.web.Result;
 import cn.wolfcode.domain.*;
+import cn.wolfcode.feign.IntergralFeignApi;
 import cn.wolfcode.feign.PayFeignApi;
 import cn.wolfcode.mapper.OrderInfoMapper;
 import cn.wolfcode.mapper.PayLogMapper;
@@ -19,6 +20,7 @@ import cn.wolfcode.service.IOrderInfoService;
 import cn.wolfcode.service.ISeckillProductService;
 import cn.wolfcode.util.IdGenerateUtil;
 import cn.wolfcode.web.msg.SeckillCodeMsg;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -47,6 +49,8 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
 
     @Resource
     private PayFeignApi payFeignApi;
+    @Resource
+    private IntergralFeignApi intergralFeignApi;
 
     @Value("${pay.returnUrl}")
     private String returnUrl;
@@ -125,6 +129,7 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
                 ret = payOnLine(orderNo);
                 break;
             case OrderInfo.PAYTYPE_INTERGRAL: //积分支付
+                ret = payOnIntegral(orderNo);
                 break;
         }
         return ret;
@@ -201,15 +206,88 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         if (StringUtils.isEmpty(orderInfo)) {
             throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
         }
+        //根据订单的支付类型，走支付宝退款或者积分退款
         switch (orderInfo.getPayType()) {
             case OrderInfo.PAYTYPE_ONLINE:
                 ret = refundOnLine(orderInfo);
                 break;
             case OrderInfo.PAYTYPE_INTERGRAL:
+                ret = refundOnIntegral(orderInfo);
                 break;
         }
-        //根据订单的支付类型，走支付宝退款或者积分退款
         return ret;
+    }
+
+    private String refundOnIntegral(OrderInfo orderInfo) {
+        //远程调用积分服务，进行退积分
+        OperateIntergralVo vo = new OperateIntergralVo();
+        vo.setPk(orderInfo.getOrderNo());
+        vo.setValue(orderInfo.getIntergral());
+        vo.setInfo("今天气温12");
+        vo.setUserId(orderInfo.getUserId());
+
+        Result<Boolean> result = intergralFeignApi.refund(vo);
+        if (StringUtils.isEmpty(result) || result.hasError() || !result.getData()) {
+            throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
+        }
+        //如果成功，修改订单状态为已退款
+        int m = orderInfoMapper.changeRefundStatus(orderInfo.getOrderNo(), OrderInfo.STATUS_REFUND);
+        if (m <= 0) {
+            throw new BusinessException(SeckillCodeMsg.SECKILL_ERROR);
+        }
+        //记录退款日志
+        RefundLog refundLog = new RefundLog();
+        refundLog.setOutTradeNo(orderInfo.getOrderNo());
+        refundLog.setRefundAmount(orderInfo.getIntergral().toString());
+        refundLog.setRefundReason(vo.getInfo());
+        refundLog.setRefundType(OrderInfo.PAYTYPE_INTERGRAL);
+        refundLog.setRefundTime(new Date());
+        m = refundLogMapper.insert(refundLog);
+        if (m <= 0) {
+            throw new BusinessException(SeckillCodeMsg.SECKILL_ERROR);
+        }
+        return "积分退款成功";
+    }
+
+    private String payOnIntegral(String orderNo) {
+        //通过订单编号，查询订单信息
+        OrderInfo orderInfo = orderInfoMapper.find(orderNo);
+        if (StringUtils.isEmpty(orderInfo)) {
+            throw new BusinessException(SeckillCodeMsg.PAY_SERVER_ERROR);
+        }
+        //远程调用积分服务 执行积分扣款
+        OperateIntergralVo vo = new OperateIntergralVo();
+        vo.setPk(orderNo);
+        vo.setValue(orderInfo.getIntergral());
+        vo.setInfo("积分太多了，用不完");
+        vo.setUserId(orderInfo.getUserId());
+        System.out.println(vo);
+
+        Result<Boolean> result = intergralFeignApi.pay(vo);
+        if (StringUtils.isEmpty(result) || result.hasError() || !result.getData()) {
+            throw new BusinessException(SeckillCodeMsg.PAY_SERVER_ERROR);
+        }
+        //修改订单状态为已付款
+        int m = orderInfoMapper.changePayStatus(orderNo,
+                OrderInfo.STATUS_ACCOUNT_PAID,
+                OrderInfo.PAYTYPE_INTERGRAL);
+        if (m <= 0) {
+            throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
+        }
+
+        //填写付款日志
+        PayLog payLog = new PayLog();
+        payLog.setTradeNo(orderNo);
+        payLog.setOutTradeNo(orderNo);
+        payLog.setNotifyTime(new Date().getTime() + "");
+        payLog.setTotalAmount(orderInfo.getIntergral().toString());
+        payLog.setPayType(OrderInfo.PAYTYPE_INTERGRAL);
+        m = payLogMapper.insert(payLog);
+        if (m <= 0) {
+            throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
+        }
+
+        return "积分支付成功";
     }
 
     private String refundOnLine(OrderInfo orderInfo) {
@@ -218,7 +296,6 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         refundVo.setOutTradeNo(orderInfo.getOrderNo());
         refundVo.setRefundAmount(orderInfo.getSeckillPrice().toString());
         refundVo.setRefundReason("不想要了");
-
 
         Result<Boolean> result = payFeignApi.refund(refundVo);
         if (StringUtils.isEmpty(result) || result.hasError()) {

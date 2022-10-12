@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 public interface UsableIntegralMapper {
     /**
      * 冻结用户积分金额
+     *
      * @param userId
      * @param amount
      * @return
@@ -14,6 +15,7 @@ public interface UsableIntegralMapper {
 
     /**
      * 提交改变，冻结金额真实扣除
+     *
      * @param userId
      * @param amount
      * @return
@@ -22,6 +24,7 @@ public interface UsableIntegralMapper {
 
     /**
      * 取消冻结金额
+     *
      * @param userId
      * @param amount
      */
@@ -29,8 +32,12 @@ public interface UsableIntegralMapper {
 
     /**
      * 增加积分
+     *
      * @param userId
      * @param amount
      */
     void addIntergral(@Param("userId") Long userId, @Param("amount") Long amount);
+
+    int descIntergral(@Param("userId") Long userId, @Param("amount") Long value);
+
 }
