@@ -106,8 +106,12 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
             throw new BusinessException(SeckillCodeMsg.SECKILL_ERROR);
         }
         //在Redis中添加订单信息(这段代码已经移动到cancel中操作)
-//        redisTemplate.opsForSet().add(SeckillRedisKey.SECKILL_ORDER_SET.getRealKey(String.valueOf(message.getUserPhone())),
-//                String.valueOf(message.getSeckillId()));
+        /**
+         * 正常应该注释掉，为在OrderInfoHandler已经有了，但是cancel没有生效，所以先放开
+         */
+        //TODO cancel bug：没有生效
+        redisTemplate.opsForSet().add(SeckillRedisKey.SECKILL_ORDER_SET.getRealKey(String.valueOf(message.getUserPhone())),
+                String.valueOf(message.getSeckillId()));
         return orderNo; //订单编号
     }
 
@@ -120,7 +124,6 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
     public int changeOrderStatusToTimeout(String orderNo) {
         return orderInfoMapper.updateCancelStatus(orderNo, OrderInfo.STATUS_TIMEOUT);
     }
-
     @Override
     public String alipay(String orderNo, Integer type) {
         String ret = null;
