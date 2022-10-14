@@ -31,7 +31,7 @@ public class IntegralController {
         if (StringUtils.isEmpty(vo)) {
             throw new BusinessException(CommonCodeMsg.PARAM_INVALID);
         }
-        return Result.success(usableIntegralService.refund(vo));
+        return Result.success(usableIntegralService.refundTry(vo, null));
     }
 
 }

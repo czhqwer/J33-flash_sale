@@ -21,6 +21,7 @@ import cn.wolfcode.service.ISeckillProductService;
 import cn.wolfcode.util.IdGenerateUtil;
 import cn.wolfcode.web.msg.SeckillCodeMsg;
 import com.sun.org.apache.xpath.internal.operations.Bool;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -124,7 +125,10 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
     public int changeOrderStatusToTimeout(String orderNo) {
         return orderInfoMapper.updateCancelStatus(orderNo, OrderInfo.STATUS_TIMEOUT);
     }
+
     @Override
+//    @Transactional //RM
+    @GlobalTransactional //当前应用是TM端
     public String alipay(String orderNo, Integer type) {
         String ret = null;
         switch (type) {
@@ -201,7 +205,8 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
     }
 
     @Override
-    @Transactional
+//    @Transactional
+    @GlobalTransactional //TM事务管理器
     public String refund(String orderNo) {
         String ret = "退款成功";
         //通过订单编号查询订单信息
@@ -233,6 +238,7 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         if (StringUtils.isEmpty(result) || result.hasError() || !result.getData()) {
             throw new BusinessException(SeckillCodeMsg.REFUND_ERROR);
         }
+        System.out.println(1/0);
         //如果成功，修改订单状态为已退款
         int m = orderInfoMapper.changeRefundStatus(orderInfo.getOrderNo(), OrderInfo.STATUS_REFUND);
         if (m <= 0) {
@@ -270,6 +276,7 @@ public class OrderInfoSeviceImpl implements IOrderInfoService {
         if (StringUtils.isEmpty(result) || result.hasError() || !result.getData()) {
             throw new BusinessException(SeckillCodeMsg.PAY_SERVER_ERROR);
         }
+//        System.out.println(1/0);
         //修改订单状态为已付款
         int m = orderInfoMapper.changePayStatus(orderNo,
                 OrderInfo.STATUS_ACCOUNT_PAID,
