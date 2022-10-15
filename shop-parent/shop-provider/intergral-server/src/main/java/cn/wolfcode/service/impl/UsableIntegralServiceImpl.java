@@ -49,7 +49,6 @@ public class UsableIntegralServiceImpl implements IUsableIntegralService {
     public Boolean refundTry(OperateIntergralVo vo, BusinessActionContext context) {
         /*+ null（正常逻辑） try（幂等） confirm（异常） cancel（什么都不做，空回滚）*/
         Boolean ret = false;
-
         //查询是否有事务日志
         //没有日志
         AccountTransaction accountTransaction = accountTransactionMapper.get(context.getXid(), String.valueOf(context.getBranchId()));
@@ -78,7 +77,6 @@ public class UsableIntegralServiceImpl implements IUsableIntegralService {
             //如果有日志，type是cancel -- 防悬挂
             ret = false;
         }
-
         return ret;
     }
 
@@ -141,6 +139,11 @@ public class UsableIntegralServiceImpl implements IUsableIntegralService {
             ret = true;
         } else if (AccountTransaction.STATE_TRY == accountTransaction.getState()) {
             //try（业务）
+            accountTransactionMapper.updateAccountTransactionState(
+                    accountTransaction.getTxId(),
+                    String.valueOf(context.getBranchId()),
+                    AccountTransaction.STATE_CANCEL,
+                    AccountTransaction.STATE_TRY);
             ret = true;
         } else if (AccountTransaction.STATE_COMMIT == accountTransaction.getState()) {
             //confirm（异常）
