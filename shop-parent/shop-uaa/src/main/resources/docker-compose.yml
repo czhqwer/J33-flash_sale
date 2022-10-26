@@ -1,0 +1,16 @@
+version: '2' # docker 的版本
+services: # 配置的容器列表
+  container-a: # 容器的名称
+    image: centos # 这个一个容器的基础镜像
+    ports: # 你的容器需不需要做端口映射
+      - "8080:80"
+    restart: always # 容器的重启策略
+    dns: # dns 的配置
+      - "8.8.8.8"
+  container-b: # 容器的名称
+    image: centos # 这个一个容器的基础镜像
+    ports: # 你的容器需不需要做端口映射
+      - "8081:80"
+    restart: always # 容器的重启策略
+    dns: # dns 的配置
+      - "8.8.8.8"
